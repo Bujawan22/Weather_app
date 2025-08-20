@@ -1,0 +1,19 @@
+# OS files
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# File dokumen atau ZIP besar
+*.docx
+*.pdf
+*.zip
+
+# File Excel
+*.xlsx
+
+# Node / Python / build folder (jika ada)
+node_modules/
+__pycache__/
+dist/
+build/
+.env
