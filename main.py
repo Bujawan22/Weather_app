@@ -14,20 +14,32 @@ def getWeather(city):
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    weather_data = None
+    # Waktu sekarang
+    now = datetime.datetime.now()
+    current_time = now.strftime("%H:%M")  # jam:menit
+    current_date = now.strftime("%A, %d %B %Y")  # Monday, 02 April 2025
+
+    # Capitalize hari dan bulan
+    current_date = current_date.title()  # jadi huruf besar di awal tiap kata
+
+    weather_data = {
+        "time": current_time,
+        "date": current_date
+    }
+
     if request.method == "POST":
         city = request.form.get("city")
         data = getWeather(city)
 
         if data["cod"] == 200:
-            weather_data = {
+            weather_data.update({
                 "nama_kota": data["name"],
                 "icon": data["weather"][0]["icon"],
                 "tanggal": datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
                 "suhu": data["main"]["temp"],
                 "kondisi": data["weather"][0]["description"],
-                "kelembapan": data["main"]["humidity"]
-            }
+                "kelembapan": data["main"]["humidity"],
+            })
         else:
             weather_data = {"error": "Kota tidak ditemukan!"}
 

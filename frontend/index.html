@@ -16,58 +16,80 @@
   </style>
 </head>
 
-<body class="h-screen flex flex-col md:flex-row bg-gray-100">
+<body class="flex flex-col md:flex-row h-screen">
 
-    <!-- Konten utama (map) -->
-    <main class="flex-1 p-4 md:p-6">
-        <div id="map" class="w-full h-[300px] md:h-[500px] rounded-xl shadow"></div>
-    </main>
+  <main class="relative flex-1 p-4 md:p-6 overflow-hidden flex flex-col">
 
-    <!-- Sidebar -->
-    <aside id="sidebar" 
+      <!-- Layer background gradien -->
+      <div class="absolute inset-0" style="background: linear-gradient(to bottom right, #799fcd, #799fcd, #e0f2fe, #799fcd, #799fcd);"></div>
+      <div class="absolute inset-0 bg-white/30 backdrop-blur-2xl"></div>
+
+      <!-- Konten atas: jam/tanggal & tulisan -->
+      <div class="relative z-10 flex justify-between items-center mb-4">
+          <!-- Jam & Tanggal di kiri -->
+          <div class="text-left">
+              <h1 id="clock" class="text-4xl font-bold text-white drop-shadow-xl"></h1>
+              <h2 id="date" class="text-lg font-bold uppercase text-white drop-shadow-lg"></h2>
+          </div>
+
+          <!-- Time is Money di kanan -->
+          <h3 class="text-5xl font-bold text-white drop-shadow-lg">About Weather</h3>
+      </div>
+
+      <!-- Map di bawah -->
+      <div class="relative z-10">
+          <div id="map" class="w-full h-[300px] md:h-[500px] rounded-xl shadow"></div>
+      </div>
+
+  </main>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" 
         class="relative w-full md:w-[450px] bg-gradient-to-br from-blue-50 via-blue-100 to-blue-300 
-               shadow-lg p-6 md:p-8 flex flex-col justify-start overflow-hidden">
-        
-        <!-- Bubble effect -->
-        <div class="absolute top-10 left-16 w-24 h-24 md:w-40 md:h-40 bg-blue-400 rounded-full opacity-20 blur-3xl"></div>
-        <div class="absolute bottom-6 right-6 w-32 h-32 md:w-52 md:h-52 bg-blue-500 rounded-full opacity-10 blur-2xl"></div>
+               shadow-xl p-6 md:p-8 flex flex-col justify-start overflow-hidden">
 
-        <!-- Form search -->
-        <form method="POST" class="mb-6 flex flex-col sm:flex-row items-center gap-2 relative z-10">
-            <input type="text" name="city" placeholder="🔍 Cari kota..."
-            class="flex-1 px-4 py-2 rounded-full border border-gray-300 shadow-sm 
-                   focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200 w-full sm:w-auto" required>
-            
-            <button type="submit"
-            class="px-5 py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium shadow-md 
-                   hover:from-blue-600 hover:to-indigo-600 transform hover:scale-105 transition duration-200 w-full sm:w-auto">
-            Cari
-            </button>
-        </form>
+      <!-- Bubble effect -->
+      <div class="absolute top-10 left-16 w-24 h-24 md:w-40 md:h-40 bg-blue-400 rounded-full opacity-20 blur-3xl"></div>
+      <div class="absolute bottom-6 right-6 w-32 h-32 md:w-52 md:h-52 bg-blue-500 rounded-full opacity-10 blur-2xl"></div>
 
-        <!-- Hasil cuaca -->
-        <div id="weather-result" class="relative z-10">
-            {% if weather %}
-            <div class="p-6 text-white rounded-2xl"
-                style="background: radial-gradient(circle at top left, #a0d1bf, #1b4fa2);">
-                <h2 class="text-2xl md:text-4xl font-bold text-center">{{ weather.nama_kota }}</h2>
-                <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@4x.png"
-                    alt="icon cuaca"
-                    class="mx-auto w-24 h-24 md:w-32 md:h-32 filter brightness-150 saturate-200 hue-rotate-30">
+      <!-- Form search -->
+      <form method="POST" class="mb-6 flex flex-col sm:flex-row items-center gap-2 relative z-10">
+          <input type="text" name="city" placeholder="🔍 Cari kota..."
+                 class="flex-1 px-4 py-2 rounded-full border border-gray-300 shadow-sm 
+                        focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200 w-full sm:w-auto" required>
+          <button type="submit"
+                  class="px-5 py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium shadow-md 
+                         hover:from-blue-600 hover:to-indigo-600 transform hover:scale-105 transition duration-200 w-full sm:w-auto">
+              Cari
+          </button>
+      </form>
 
-                <div class="text-xl md:text-2xl capitalize text-center font-bold">{{ weather.kondisi }}</div>
-                <p class="text-sm md:text-lg mt-1 text-center">{{ weather.tanggal }}</p>
-                <p class="text-sm md:text-lg mt-1 text-center">{{ weather.jam }}</p>
-                <p class="text-4xl md:text-5xl text-center font-bold mt-8 mb-6">{{ weather.suhu }}°C</p>
-                <p class="mt-1 text-center">Kelembapan: {{ weather.kelembapan }}%</p>
-            </div>
-            {% else %}
-                <h2 class="text-2xl font-semibold text-center">Pilih kota di map</h2>
-            {% endif %}
-        </div>
-    </aside>
+      <!-- Hasil cuaca -->
+      <div id="weather-result" class="relative z-10">
+          {% if weather %}
+          <div class="p-6 text-white rounded-2xl"
+               style="background: radial-gradient(circle at top left, #a0d1bf, #1b4fa2);">
+              <h2 class="text-2xl md:text-4xl font-bold text-center">{{ weather.nama_kota }}</h2>
+              <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@4x.png"
+                   alt="icon cuaca"
+                   class="mx-auto w-24 h-24 md:w-32 md:h-32 filter brightness-150 saturate-200 hue-rotate-30">
+
+              <div class="text-xl md:text-2xl capitalize text-center font-bold">{{ weather.kondisi }}</div>
+              <p class="text-sm md:text-lg mt-1 text-center">{{ weather.tanggal }}</p>
+              <p class="text-4xl md:text-5xl text-center font-bold mt-8 mb-6">{{ weather.suhu }}°C</p>
+              <p class="mt-1 text-center">Kelembapan: {{ weather.kelembapan }}%</p>
+          </div>
+          {% else %}
+              <h2 class="text-2xl font-semibold text-center">Pilih kota di map</h2>
+          {% endif %}
+      </div>
+  </aside>
 
 </body>
+
+
+
+
 
 <script>
   // Inisialisasi map
@@ -130,6 +152,27 @@
         });
     }
 
+</script>
+
+<script>
+function updateClock() {
+    const now = new Date();
+    
+    // Format jam:menit:detik
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+
+    // Format tanggal: Monday, 02 April 2025
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' };
+    const dateString = now.toLocaleDateString('en-US', options).toUpperCase();
+    document.getElementById('date').textContent = dateString;
+}
+
+// Jalankan segera dan update setiap detik
+updateClock();
+setInterval(updateClock, 1000);
 </script>
 
 </html>
