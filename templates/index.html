@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Cuaca</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col md:flex-row h-screen">
+
+  <main class="relative flex-1 p-4 md:p-6 overflow-hidden flex flex-col">
+
+    <div class="absolute inset-0 z-0">
+      <!-- background blur yang ditarik full -->
+      <div 
+        id="time-bg-blur"
+        class="absolute inset-0 bg-center bg-cover scale-110 blur-xl">
+      </div>
+
+      <!-- background utama proporsional -->
+      <div 
+        id="time-bg"
+        class="absolute inset-0 bg-center bg-contain bg-no-repeat">
+      </div>
+    </div>
+
+    <!-- Overlay blur -->
+    <div class="absolute inset-0 bg-white/2 backdrop-blur-sm z-5"></div>
+
+      <!-- Konten atas: jam/tanggal & tulisan -->
+      <div class="relative z-10 flex justify-between items-center mb-4">
+          <!-- Jam & Tanggal di kiri -->
+          <div class="text-left">
+              <h1 id="clock" class="text-4xl font-bold text-white drop-shadow-xl"></h1>
+              <h2 id="date" class="text-lg font-bold uppercase text-white drop-shadow-lg"></h2>
+          </div>
+
+          <!-- Time is Money di kanan -->
+          <h3 class="text-5xl font-bold text-white drop-shadow-lg">About Weather</h3>
+      </div>
+
+      <!-- Map di bawah -->
+      <div class="relative z-10">
+          <div id="map" class="w-full h-[300px] md:h-[500px] rounded-xl shadow"></div>
+      </div>
+
+  </main>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" 
+       class="relative w-full md:w-[450px] 
+              bg-gradient-to-br from-blue-50 via-blue-100 to-blue-300 bg-opacity-80
+              backdrop-blur-xl
+              shadow-xl p-6 md:p-8 
+              flex flex-col justify-start overflow-hidden rounded-2xl">
+              
+      <!-- Bubble effect
+      <div class="absolute top-10 left-16 w-24 h-24 md:w-40 md:h-40 bg-blue-400 rounded-full opacity-20 blur-3xl"></div>
+      <div class="absolute bottom-6 right-6 w-32 h-32 md:w-52 md:h-52 bg-blue-500 rounded-full opacity-10 blur-2xl"></div> -->
+
+      <!-- Form search -->
+      <form method="POST" class="mb-6 flex flex-col sm:flex-row items-center gap-2 relative z-10">
+          <input type="text" name="city" placeholder="🔍 Cari kota..."
+                 class="flex-1 px-4 py-2 rounded-full border border-gray-300 shadow-sm 
+                        focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200 w-full sm:w-auto" required>
+          <button type="submit"
+                  class="px-5 py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium shadow-md 
+                         hover:from-blue-600 hover:to-indigo-600 transform hover:scale-105 transition duration-200 w-full sm:w-auto">
+              Cari
+          </button>
+      </form>
+
+      <!-- Hasil cuaca -->
+      <div id="weather-result" class="relative z-10">
+          {% if weather %}
+          <div class="p-6 text-white rounded-2xl shadow-2xl"
+               style="background: radial-gradient(circle at top left, #a0d1bf, #1b4fa2);">
+              <h2 class="text-2xl md:text-4xl font-bold text-center">{{ weather.nama_kota }}</h2>
+              <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@4x.png"
+                   alt="icon cuaca"
+                   class="mx-auto w-24 h-24 md:w-32 md:h-32 filter brightness-150 saturate-200 hue-rotate-30">
+
+              <div class="text-xl md:text-2xl capitalize text-center font-bold">{{ weather.kondisi }}</div>
+              <p class="text-sm md:text-lg mt-1 text-center">{{ weather.tanggal }}</p>
+              <p class="text-4xl md:text-5xl text-center font-bold mt-8 mb-6">{{ weather.suhu }}°C</p>
+          </div>
+          {% else %}
+              <h2 class="text-2xl font-semibold text-center">Pilih kota di map</h2>
+          {% endif %}
+      </div>
+
+      <div id="weather-result" class="relative z-10 mt-8">
+        {% if weather %}
+        <div class="p-6 text-white rounded-2xl shadow-2xl"
+            style="background: radial-gradient(circle at top left, #7aa8f3, #3c4f83, #4d4b86);">
+            
+            <!-- Judul -->
+            <h1 class="text-2xl md:text-3xl font-bold text-center mb-6">Air Conditions</h1>
+
+            <!-- Grid 3 kolom -->
+            <div class="grid grid-cols-3 gap-4 text-center">
+              
+              <!-- Humidity -->
+              <div class="flex flex-col items-center">
+                <div class="text-4xl">💧</div>
+                <div class="text-lg font-semibold">Humidity</div>
+                <div class="text-xl" id="air-humidity">{{ weather.kelembapan }}%</div>
+              </div>
+
+              <!-- Clouds -->
+              <div class="flex flex-col items-center">
+                <div class="text-4xl">☁️</div>
+                <div class="text-lg font-semibold">Clouds</div>
+                <div class="text-xl" id="air-clouds">{{ weather.awan }}%</div>
+              </div>
+
+              <!-- Rain -->
+              <div class="flex flex-col items-center">
+                <div class="text-4xl">🌧️</div>
+                <div class="text-lg font-semibold">Rain</div>
+                <div class="text-xl" id="air-rain">{{ weather.hujan }}%</div>
+              </div>
+
+            </div>
+        </div>
+        {% else %}
+            <h2 class="text-2xl font-semibold text-center">Select a city from the map</h2>
+        {% endif %}
+      </div>
+      
+  </aside>
+
+</body>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</html>

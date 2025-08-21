@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import requests
 import datetime
 
-app = Flask(__name__, template_folder='frontend')
+app = Flask(__name__, template_folder='templates')
 
 API_KEY = "ca77bd08362e957a069864c6068e71fb"
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
@@ -18,30 +18,33 @@ def home():
     now = datetime.datetime.now()
     current_time = now.strftime("%H:%M")  # jam:menit
     current_date = now.strftime("%A, %d %B %Y")  # Monday, 02 April 2025
-
-    # Capitalize hari dan bulan
-    current_date = current_date.title()  # jadi huruf besar di awal tiap kata
+    current_date = current_date.title()
 
     weather_data = {
         "time": current_time,
         "date": current_date
     }
 
+    data = None  # <-- inisialisasi dulu
+
     if request.method == "POST":
         city = request.form.get("city")
-        data = getWeather(city)
+        if city:  # jangan request kalau kosong
+            data = getWeather(city)
 
-        if data["cod"] == 200:
-            weather_data.update({
-                "nama_kota": data["name"],
-                "icon": data["weather"][0]["icon"],
-                "tanggal": datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
-                "suhu": data["main"]["temp"],
-                "kondisi": data["weather"][0]["description"],
-                "kelembapan": data["main"]["humidity"],
-            })
-        else:
-            weather_data = {"error": "Kota tidak ditemukan!"}
+    if data and data.get("cod") == 200:   # <-- cek dulu biar aman
+        weather_data.update({
+            "nama_kota": data["name"],
+            "icon": data["weather"][0]["icon"],
+            "tanggal": datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+            "suhu": data["main"]["temp"],
+            "kondisi": data["weather"][0]["description"],
+            "kelembapan": data["main"]["humidity"],
+            "awan": data.get("clouds", {}).get("all", 0),  
+            "hujan": data.get("rain", {}).get("1h", 0)     
+        })
+    elif data:  # kalau POST tapi gagal ambil cuaca
+        weather_data = {"error": "Kota tidak ditemukan!"}
 
     return render_template("index.html", weather=weather_data)
 
@@ -60,7 +63,9 @@ def weather_by_coord():
             "tanggal": datetime.datetime.now().strftime("%d-%B-%Y %H:%M:%S"),
             "suhu": round(data["main"]["temp"]),
             "kondisi": data["weather"][0]["description"],
-            "kelembapan": data["main"]["humidity"]
+            "kelembapan": data["main"]["humidity"],
+            "awan": data.get("clouds", {}).get("all", 0),  
+            "hujan": data.get("rain", {}).get("1h", 0) 
         }
         return weather_data
     else:
